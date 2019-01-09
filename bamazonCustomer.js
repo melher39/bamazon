@@ -1,11 +1,14 @@
 // import mysql node package
-let mysql = require("mysql");
+const mysql = require("mysql");
 
 // import inquirer node package
-let inquirer = require("inquirer");
+const inquirer = require("inquirer");
+
+// import console.table package for easy formatting
+const cTable = require('console.table');
 
 // create connection to the mysql database "bamazon"
-let connection = mysql.createConnection({
+const connection = mysql.createConnection({
     host: "localhost",
   
     // Your port; if not 3306
