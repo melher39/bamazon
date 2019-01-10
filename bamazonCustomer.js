@@ -11,13 +11,13 @@ const cTable = require('console.table');
 const connection = mysql.createConnection({
     host: "localhost",
 
-    // Your port; if not 3306
+    // connection port
     port: 3306,
 
-    // Your username
+    // my username
     user: "Melvin Hernandez",
 
-    // Your password
+    // my password
     password: "m39641542",
     database: "bamazon"
 });
@@ -25,10 +25,12 @@ const connection = mysql.createConnection({
 // if the connection is successful, then show the ID, if not an error
 connection.connect((err) => {
     if (err) throw err;
+
+    // display the connection ID, will comment out once this assignment is finished
     console.log("connected as id " + connection.threadId);
+
+    // display the items for sale at the very start of the program
     displayItemsForSale();
-    // end the connection so it won't be running in the background
-    // connection.end();
 });
 
 // display the items in a table
@@ -50,6 +52,8 @@ const displayItemsForSale = () => {
 
 // function that will prompt the user and find out which item they wish to buy
 const buyItem = () => {
+
+    // these answers will be stored and accessed later
     inquirer.prompt([
         {
             name: "item",
@@ -62,32 +66,59 @@ const buyItem = () => {
             message: "How many units of this product would you like?"
         }
     ])
-    // with the answer, use it to see if the store has enough in stock
+    // with these answers, use them to see if the store has enough in stock
     .then( (answer) => {
 
         // search the database for the item chosen by the user and its quantity in stock
-        let query = "SELECT stock_quantity FROM products WHERE ?";
+        let query = "SELECT stock_quantity, price FROM products WHERE ?";
         connection.query(query, { item_id: answer.item }, (err,res) => {
 
             // store the key(value) of the selected item's stock_quantity column in this variable
             let stockQuantity = res[0].stock_quantity;
 
-            console.log("this is supposed to work " , stockQuantity);
-            console.log("this is something else " , res[0]);
-            console.log("let's try something else " , res.stock_quantity);
+            let itemPrice = res[0].price;
+
+            // testing for my own understanding of what we were accessing...
+            // console.log("this is supposed to work " , stockQuantity);
+            // console.log("this is something else " , res[0]);
 
             // if there is insufficient items in inventory to fulfill the customer's request, then let them know this
             if (parseInt(answer.quantity) > parseInt(stockQuantity) ) {
                 console.log("Insufficient quantity! \nPlease choose a lower quantity of this item and try again!");
             }
             else{
-                console.log("Thanks for shopping with us!");
+
+                connection.query("UPDATE products SET ? WHERE ? ",
+                [
+                    {
+                        stock_quantity: stockQuantity - answer.quantity
+                    },
+                    {
+                        item_id: answer.item
+                    }
+                ],
+                (err) => {
+                    if (err) throw err;
+
+                    let totalPrice = itemPrice * answer.quantity;
+
+                    console.log("The total amount due is: $" + totalPrice + "\nThanks for shopping with us!");
+                }
+                );
+
+                
             }
+
+            // end the connection so it won't be running in the background
+            connection.end();
             
         });
-        // end the connection so it won't be running in the background
-        connection.end();
+        
 
     });
+}
+
+const successfulPurchase = () => {
+
 }
 
