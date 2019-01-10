@@ -24,10 +24,11 @@ const connection = mysql.createConnection({
 
 // if the connection is successful, then show the ID, if not an error
 connection.connect((err) => {
+    // error message
     if (err) throw err;
 
     // display the connection ID, will comment out once this assignment is finished
-    console.log("connected as id " + connection.threadId);
+    // console.log("connected as id " + connection.threadId);
 
     // display the items for sale at the very start of the program
     displayItemsForSale();
@@ -66,59 +67,51 @@ const buyItem = () => {
             message: "How many units of this product would you like?"
         }
     ])
-    // with these answers, use them to see if the store has enough in stock
-    .then( (answer) => {
+        // with these answers, use them to see if the store has enough in stock
+        .then((answer) => {
 
-        // search the database for the item chosen by the user and its quantity in stock
-        let query = "SELECT stock_quantity, price FROM products WHERE ?";
-        connection.query(query, { item_id: answer.item }, (err,res) => {
+            // search the database for the item chosen by the user, its price and quantity in stock
+            let query = "SELECT stock_quantity, price FROM products WHERE ?";
+            connection.query(query, { item_id: answer.item }, (err, res) => {
 
-            // store the key(value) of the selected item's stock_quantity column in this variable
-            let stockQuantity = res[0].stock_quantity;
+                // store the key(value) of the selected item's stock_quantity column in this variable
+                let stockQuantity = res[0].stock_quantity;
 
-            let itemPrice = res[0].price;
+                // store the price of the selected item in this variable
+                let itemPrice = res[0].price;
 
-            // testing for my own understanding of what we were accessing...
-            // console.log("this is supposed to work " , stockQuantity);
-            // console.log("this is something else " , res[0]);
-
-            // if there is insufficient items in inventory to fulfill the customer's request, then let them know this
-            if (parseInt(answer.quantity) > parseInt(stockQuantity) ) {
-                console.log("Insufficient quantity! \nPlease choose a lower quantity of this item and try again!");
-            }
-            else{
-
-                connection.query("UPDATE products SET ? WHERE ? ",
-                [
-                    {
-                        stock_quantity: stockQuantity - answer.quantity
-                    },
-                    {
-                        item_id: answer.item
-                    }
-                ],
-                (err) => {
-                    if (err) throw err;
-
-                    let totalPrice = itemPrice * answer.quantity;
-
-                    console.log("The total amount due is: $" + totalPrice + "\nThanks for shopping with us!");
+                // if there is insufficient items in inventory to fulfill the customer's request, then let them know this
+                if (parseInt(answer.quantity) > parseInt(stockQuantity)) {
+                    console.log("Insufficient quantity! \nPlease choose a lower quantity of this item and try again!");
+                    // run the prompt again, allowing the user to choose a different item and/or quantity
+                    buyItem();
                 }
-                );
+                // if there is enough items available for purchase, then proceed with the transaction
+                else {
 
-                
-            }
+                    // update the tables's stock_quantity with the remainder number of items after the purchase
+                    connection.query("UPDATE products SET ? WHERE ? ",
+                        [
+                            {
+                                stock_quantity: stockQuantity - answer.quantity
+                            },
+                            {
+                                item_id: answer.item
+                            }
+                        ],
+                        (err) => {
+                            if (err) throw err;
 
-            // end the connection so it won't be running in the background
-            connection.end();
-            
+                            // total price calculation
+                            let totalPrice = itemPrice * answer.quantity;
+
+                            // let the user(customer) know the total amount due and thank them for shopping here
+                            console.log("The total amount due is: $" + totalPrice + "\nThanks for shopping with us!");
+                        }
+                    );
+                    // end the connection so it won't be running in the background
+                    connection.end();
+                }
+            });
         });
-        
-
-    });
-}
-
-const successfulPurchase = () => {
-
-}
-
+};
