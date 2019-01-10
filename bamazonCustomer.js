@@ -4,7 +4,7 @@ const mysql = require("mysql");
 // import inquirer node package
 const inquirer = require("inquirer");
 
-// import console.table package for easy formatting
+// import console.table package for nicer output/formatting
 const cTable = require('console.table');
 
 // create connection to the mysql database "bamazon"
@@ -27,7 +27,6 @@ connection.connect((err) => {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
     displayItemsForSale();
-    buyItem();
     // end the connection so it won't be running in the background
     // connection.end();
 });
@@ -37,13 +36,15 @@ const displayItemsForSale = () => {
 
     // select only the columns we want to be displayed from the database table
     connection.query("SELECT item_id, product_name, price, stock_quantity FROM products", (err, res) => {
-        // if (err) throw err;
+        if (err) throw err;
 
         //   display these results in a table
         console.table(res);
 
+        // once the results have been displayed, run the inquirer prompts
+        buyItem();
+
     })
-    // buyItem();
 
 };
 
@@ -63,7 +64,7 @@ const buyItem = () => {
     ])
     // with the answer, use it to see if the store has enough in stock
     .then( (answer) => {
-        // console.log(answer.item + answer.quantity);
+
         // search the database for the item chosen by the user and its quantity in stock
         let query = "SELECT stock_quantity FROM products WHERE ?";
         connection.query(query, { item_id: answer.item }, (err,res) => {
@@ -72,7 +73,7 @@ const buyItem = () => {
             let stockQuantity = res[0].stock_quantity;
 
             console.log("this is supposed to work " , stockQuantity);
-            console.log("this is something else " , res[0].stock_quantity);
+            console.log("this is something else " , res[0]);
             console.log("let's try something else " , res.stock_quantity);
 
             // if there is insufficient items in inventory to fulfill the customer's request, then let them know this
@@ -80,10 +81,11 @@ const buyItem = () => {
                 console.log("Insufficient quantity! \nPlease choose a lower quantity of this item and try again!");
             }
             else{
-                console.log("not working buddy!");
+                console.log("Thanks for shopping with us!");
             }
             
         });
+        // end the connection so it won't be running in the background
         connection.end();
 
     });
