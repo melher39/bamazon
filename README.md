@@ -26,7 +26,7 @@ Before you begin, make sure you install the proper packages (these can be found 
 
 If you were to run the app again, you would notice that the previously purchased item's stock_quantity has now decreased by the amount that was purchased. The same is true if you were to check the table in the mysql database.
 
-Follow this link to see a video demo of this program fully working: 
+Follow this link to see a video demo of this program fully working: https://drive.google.com/file/d/1gdRBXtHh6Q9gHKawSMV72sr2KDTP_cpv/view?usp=sharing
 
 Make sure to watch the video in 1080p HD quality so you can clearly see the text on the screen.
 
