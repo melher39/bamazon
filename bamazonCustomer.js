@@ -22,8 +22,24 @@ const connection = mysql.createConnection({
     database: "bamazon"
   });
 
+  // if the connection is successful, then show the ID, if not an error
   connection.connect(function(err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
+    displayItemsForSale();
+    // end the connection so it won't be running in the background
     connection.end();
   });
+
+  // display the items in a table
+  const displayItemsForSale = () => {
+    //   var table;
+
+      connection.query("SELECT item_id, product_name, price, stock_quantity FROM bamazon.products", (err,res)=>{
+          if (err) throw err;
+
+          console.table(res);
+        
+      })
+    
+  };
